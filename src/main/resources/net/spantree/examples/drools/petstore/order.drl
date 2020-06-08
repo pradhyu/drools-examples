@@ -34,6 +34,34 @@ rule "orders should calculate subtotal"
         update($order);
 end
 
+query printOrders(Double t, Double s,Order result)
+    $result: Order(t:=total, s:=subtotal, result:=this)
+end
+
+//https://docs.drools.org/7.0.0.CR1/drools-docs/html_single/#_use_of_any_expressions_as_input_for_a_query
+query countOrders(Integer $result)
+   $result:=Number() accumulate (Order($o:this);count($o))
+end
+
+rule "print order count"
+when
+    exists(Order())
+    countOrders($count;)
+then
+System.out.println("query:orderCount ordercount="+$count);
+end
+
+
+rule "print order and subtotal"
+    when
+     printOrders($t, $s, $order;)
+     countOrders($count;)
+     then
+     System.out.println("query:printOrders=>count=" + $count + "total" + $t +", subtotoal=" +$s+ " , order="+$order);
+
+ end
+
+
 rule "orders should calculate total"
     salience 1
     when
